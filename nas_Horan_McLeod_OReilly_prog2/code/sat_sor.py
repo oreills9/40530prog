@@ -10,45 +10,47 @@ def row_iterator(input_file):
     {"val": [], "col": [], "row_start": [], "B" = [], "N" = 0.0}
     '''
 
-    infile = open(input_file, "r")
-    csr = {"val": [], "col": [], "row_start": [], "B" = [], "N" = 0.0}
+    csr = {"val": [], "col": [], "row_start": [], "B": [], "N": 0.0}
 
     ## We want to perform as many of the checks and functions during
     ## the single iterations as possible. As we iterate through the input
     ## file we need populate the csr dict with the matrix size and the
     ## matrix values in csr format and the B vector on the last line
     line_count = 0
-    for line in infile:
-        ## Get line in list format, remove carriage returns and commas
-        formatted_line = ([float(x) for x in line.rstrip().rsplit(',')])
+    with open(input_file, "r") as infile:
+        for line in infile:
+            ## Get line in list format, remove carriage returns and commas
+            formatted_line = ([float(x) for x in line.rstrip().rsplit(',')])
 
-        ## The first line is the matrix size so not part of the matrix
-        if line_count == 0:
-            csr["N"] = formatted_line[0]
-            if (csr["N"] == 0.0):
-                output_file(stop_reson = "Zero Matix Size")
-                return
-        ## The last line is the vector B
-        elif line_count == csr["N"] + 1:
-            csr["B"] = formatted_line
-            if (len(B) !== csr["N"]):
-                output_file(stop_reson = "Corrupt B")
-                return
-        ## All other lines are part of the matrix
-        else:
-            ## Validate row length and matrix row requirements
-            row_check(formatted_line,line_count-1,csr["N"])
-            ## Create CSR dict as we iterate through the lines
-            csr = convert_csr(csr, formatted_line)
+            ## The first line is the matrix size so not part of the matrix
+            if line_count == 0:
+                csr["N"] = formatted_line[0]
+                if (csr["N"] == 0.0):
+                    output_file(stop_reson = "Zero Matix Size")
+                    return
+            ## The last line is the vector B
+            elif line_count == csr["N"] + 1:
+                csr["B"] = formatted_line
+                if (len(csr['B']) != csr["N"]):
+                    output_file(stop_reson = "Corrupt B")
+                    return
+            ## All other lines are part of the matrix
+            else:
+                ## Validate row length and matrix row requirements
+                row_check(formatted_line,line_count-1,csr["N"])
+                ## Create CSR dict as we iterate through the lines
+                csr = convert_csr(csr, formatted_line)
 
-        line_count +=1
+            line_count +=1
 
-        ## Check line count N+2
+            ## Check line count N+2
+    return(csr)
 
 def row_check(row,row_number,N):
     running_sum = 0
+    d = 0
 
-    if(len(row)!== N):
+    if(len(row)!= N):
         output_file(stop_reson = "Not enough elements on row")
         return
 
@@ -68,7 +70,8 @@ def row_check(row,row_number,N):
 
 def convert_csr(csr, row_contents):
     ## As strictly diagonally dominant, can assume each row has at least one elem.
-    csr["row_start"].append(len(csr["col"]+1))
+    print(len(csr["col"])+1)
+    csr["row_start"].append(len(csr["col"])+1)
 
     for index, item in enumerate(row_contents):
         ## if the entry is zero then just move on
@@ -111,12 +114,15 @@ def sor_sum(initial,csr):
     ## it gets sum excluding diagonal * x
     ## retuns this 
     ## Cian
+    return
 
 def get_diagonal():
     ## Cian
+    return
 
 def vector_norm(vector):
     ## Cathal
+    return
 
 def convergence_check():
     ## Cathal
@@ -126,9 +132,14 @@ def convergence_check():
     ## has to hold previous values
     ## check for diverging
     ## check for converging but not converged
+    return
 
 def output_file(num_its = 0, x = None, stop_reson = None):
     print("Output file contents")
     ## Stephen
     ## call sys.exit
+    return
 
+if __name__ == '__main__':
+    csr = row_iterator('input_file_1.txt')
+    print(csr)
