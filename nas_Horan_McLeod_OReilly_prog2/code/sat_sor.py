@@ -1,27 +1,44 @@
-## MATRIX_SIZE 0 as first file of line
-MATRIX_SIZE = 0
-
 def row_iterator(input_file):
+    '''
+    Input:
+    File with following format:
+    Line 1: Matrix size
+    Line 2-N: N double values
+    Line N+2: N values for B vector
+    Output:
+    Dictionary with format:
+    {"val": [], "col": [], "row_start": [], "B" = [], "N" = 0.0}
+    '''
+
     infile = open(input_file, "r")
-    
     csr = {"val": [], "col": [], "row_start": [], "B" = [], "N" = 0.0}
 
+    ## We want to perform as many of the checks and functions during
+    ## the single iterations as possible. As we iterate through the input
+    ## file we need populate the csr dict with the matrix size and the
+    ## matrix values in csr format and the B vector on the last line
     line_count = 0
     for line in infile:
+        ## Get line in list format, remove carriage returns and commas
         formatted_line = ([float(x) for x in line.rstrip().rsplit(',')])
-        
+
+        ## The first line is the matrix size so not part of the matrix
         if line_count == 0:
             csr["N"] = formatted_line[0]
-            if (N == 0.0):
+            if (csr["N"] == 0.0):
                 output_file(stop_reson = "Zero Matix Size")
                 return
-        elif line_count == N+1 
+        ## The last line is the vector B
+        elif line_count == csr["N"] + 1:
             csr["B"] = formatted_line
-            if (len(B) !== N):
+            if (len(B) !== csr["N"]):
                 output_file(stop_reson = "Corrupt B")
                 return
+        ## All other lines are part of the matrix
         else:
+            ## Validate row length and matrix row requirements
             row_check(formatted_line,line_count-1,csr["N"])
+            ## Create CSR dict as we iterate through the lines
             csr = convert_csr(csr, formatted_line)
 
         line_count +=1
@@ -50,14 +67,19 @@ def row_check(row,row_number,N):
         return
 
 def convert_csr(csr, row_contents):
-    ## As strictly diaganolly dominant, can assume each row has at least one elem.
+    ## As strictly diagonally dominant, can assume each row has at least one elem.
     csr["row_start"].append(len(csr["col"]+1))
 
     for index, item in enumerate(row_contents):
+        ## if the entry is zero then just move on
         if item == 0.0:
             continue
+
         else:
+            ## The val will contain all non zero entries
             csr["val"].append(item)
+            ## Index will restart for each row
+            ## Want to add 1 so we dont start at 0
             csr["col"].append(index+1)
 
     return csr
