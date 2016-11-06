@@ -1,3 +1,5 @@
+import math
+
 def row_iterator(input_file):
     '''
     Input:
@@ -96,7 +98,7 @@ def sor_calc(csr,maxits,tol,omega):
         x_one = new_x(x_zero,csr,omega)
 
         if vector_norm(x_one) - vector_norm(x_zero) < "tol formula involving mach eps":
-            output_file(stop_reson = "Converted")
+            output_file(stop_reson="Converted")
             return
         else: 
             converging = convergence_check(new_x)
@@ -122,7 +124,15 @@ def get_diagonal():
 
 def vector_norm(vector):
     ## Cathal
-    return
+    ## Calculating length or 2 norm of vector
+    val = 0
+    for elem in vector:
+        val += elem**2
+    ## Check for zero vector
+    if val == 0:
+        return(0)
+    else:
+        return(math.sqrt(val))
 
 def convergence_check():
     ## Cathal
@@ -143,3 +153,5 @@ def output_file(num_its = 0, x = None, stop_reson = None):
 if __name__ == '__main__':
     csr = row_iterator('input_file_1.txt')
     print(csr)
+    norm = vector_norm([1, 2, 3])
+    print(norm)
