@@ -1,4 +1,7 @@
 import math
+import numpy as np
+
+Em = np.finfo(float).eps
 
 def row_iterator(input_file):
     '''
@@ -101,7 +104,7 @@ def sor_calc(csr,maxits,tol,omega):
             output_file(stop_reson="Converted")
             return
         else: 
-            converging = convergence_check(new_x)
+            converging = convergence_check(x_one, new_x)
 
     ## returns stop reason num its and x
 
@@ -134,15 +137,20 @@ def vector_norm(vector):
     else:
         return(math.sqrt(val))
 
-def convergence_check():
+def convergence_check(prev_x, cur_x):
     ## Cathal
     ## returns true if going good (converging towards a point)
     ## false if diverging
-    ## vecrtor norm
+    ## vector norm
     ## has to hold previous values
     ## check for diverging
     ## check for converging but not converged
-    return
+    x_diff = abs(cur_x - prev_x)
+    tol = 4 * Em * abs(cur_x)
+    if x_diff <= tol:
+        return(False)
+    else:
+        return(True)
 
 def output_file(num_its = 0, x = None, stop_reson = None):
     print("Output file contents")
