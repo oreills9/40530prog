@@ -1,5 +1,17 @@
 import math
 import numpy as np
+import sys
+
+## Allowable reasons for exiting process
+STOP_REASON_X_SEQ_CON = 'x Sequence Convergence'
+STOP_REASON_RES_CON = 'Residual Convergence'
+STOP_REASON_MAX_ITS = 'Max Iterations Reached'
+STOP_REASON_DIVERGENCE = 'x Sequence Divergence'    
+STOP_REASON_ZERO_DIAGONAL = 'Zero On Diagonal'
+STOP_REASON_OTHER = 'Cannot Proceed'
+STOP_REASON_ZERO_MATRIX = 'Zero Matrix Size'
+STOP_REASON_INVALID_MATRIX = 'Invalid Matrix Input'
+STOP_REASON_NOT_DIAG_DOM = 'Matrix Not Diagonally Dominant'
 
 Em = np.finfo(float).eps
 
@@ -31,13 +43,13 @@ def row_iterator(input_file):
             if line_count == 0:
                 csr["N"] = formatted_line[0]
                 if (csr["N"] == 0.0):
-                    output_file(stop_reson = "Zero Matix Size")
+                    return_results(stopReason = STOP_REASON_ZERO_MATRIX)
                     return
             ## The last line is the vector B
             elif line_count == csr["N"] + 1:
                 csr["B"] = formatted_line
                 if (len(csr['B']) != csr["N"]):
-                    output_file(stop_reson = "Corrupt B")
+                    return_results(stopReason = STOP_REASON_INVALID_MATRIX)
                     return
             ## All other lines are part of the matrix
             else:
@@ -56,7 +68,7 @@ def row_check(row,row_number,N):
     d = 0
 
     if(len(row)!= N):
-        output_file(stop_reson = "Not enough elements on row")
+        return_results(stopReason = STOP_REASON_INVALID_MATRIX)
         return
 
     for i in range(row_number):
@@ -64,13 +76,13 @@ def row_check(row,row_number,N):
         if i == row_number:
             d = abs(elem)
             if elem == 0.0:
-                output_file(stop_reson = "Zero on diagonal")
+                return_results(stopReason = STOP_REASON_ZERO_DIAGONAL)
                 return
         else:
             running_sum += abs(elem)
     
     if d < running_sum: 
-        output_file(stop_reson = "Not strictly diagonal dominant")
+        return_results(stopReason = STOP_REASON_NOT_DIAG_DOM)
         return
 
 def convert_csr(csr, row_contents):
@@ -101,7 +113,7 @@ def sor_calc(csr,maxits,tol,omega):
         x_one = new_x(x_zero,csr,omega)
 
         if vector_norm(x_one) - vector_norm(x_zero) < "tol formula involving mach eps":
-            output_file(stop_reson="Converted")
+            return_results(output_file, stopReason="Converted")
             return
         else: 
             converging = convergence_check(x_one, new_x)
@@ -152,14 +164,44 @@ def convergence_check(prev_x, cur_x):
     else:
         return(True)
 
-def output_file(num_its = 0, x = None, stop_reson = None):
-    print("Output file contents")
-    ## Stephen
-    ## call sys.exit
-    return
+def get_input_file():
+    ## Check if input filename is provided, if not default to 'nas_Sor.in'
+    filename = 'nas_Sor.in' if len(sys.argv) < 2 else sys.argv[2]
+    print(filename)        
+    return filename
+    
+def get_output_file():
+    ## Check if output filename is provided, if not default to 'nas_Sor.out'    
+    filename = 'nas_Sor.out' if len(sys.argv) < 3 else sys.argv[3]
+    print(filename)        
+    return filename
+    
+def return_results(num_its = 0, x = None, stopReason = None, e = 0, max_its = 0, x_seq_tol = 0, res_seq_tol = 0):
+    ## Confirm the filename of the output text    
+    output_file = get_output_file()  
+    
+    ## Write out lines (with padding, when necessary)
+    file = open(output_file, 'w')
+    headings = 'Stopping Reason | Max No. of Iterations | Number of Iterations | Machine Epsilon | X Sequence Tolerance | Residual Sequence Tolerance'
+    print(headings)
+    results = stopReason + ' ' + str(max_its) + ' ' + str(num_its) + ' ' + str(e) + ' ' + str(x_seq_tol) + ' ' + str(res_seq_tol)
+    print(results)
+    file.write(headings)
+    file.write(results)
+    
+    if stopReason in (STOP_REASON_X_SEQ_CON, STOP_REASON_RES_CON, STOP_REASON_MAX_ITS ):
+        ## Only print results when appropriate to do so        
+        print(x)
+        file.write(x)
+    file.close()
+    sys.exit()
 
 if __name__ == '__main__':
-    csr = row_iterator('input_file_1.txt')
+    ## First confirm the file to read the data from
+    input_file = get_input_file()
+    
+    csr = row_iterator(input_file)
+    #csr = row_iterator('input_file_1.txt')
     print(csr)
     norm = vector_norm([1, 2, 3])
     print(norm)
