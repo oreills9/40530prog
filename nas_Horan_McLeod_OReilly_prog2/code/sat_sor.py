@@ -1,4 +1,5 @@
 import math
+import numpy as np
 import sys
 
 ## Allowable reasons for exiting process
@@ -12,6 +13,7 @@ STOP_REASON_ZERO_MATRIX = 'Zero Matrix Size'
 STOP_REASON_INVALID_MATRIX = 'Invalid Matrix Input'
 STOP_REASON_NOT_DIAG_DOM = 'Matrix Not Diagonally Dominant'
 
+Em = np.finfo(float).eps
 
 def row_iterator(input_file):
     '''
@@ -114,7 +116,7 @@ def sor_calc(csr,maxits,tol,omega):
             return_results(output_file, stopReason="Converted")
             return
         else: 
-            converging = convergence_check(new_x)
+            converging = convergence_check(x_one, new_x)
 
     ## returns stop reason num its and x
 
@@ -147,15 +149,20 @@ def vector_norm(vector):
     else:
         return(math.sqrt(val))
 
-def convergence_check():
+def convergence_check(prev_x, cur_x):
     ## Cathal
     ## returns true if going good (converging towards a point)
     ## false if diverging
-    ## vecrtor norm
+    ## vector norm
     ## has to hold previous values
     ## check for diverging
     ## check for converging but not converged
-    return
+    x_diff = abs(cur_x - prev_x)
+    tol = 4 * Em * abs(cur_x)
+    if x_diff <= tol:
+        return(False)
+    else:
+        return(True)
 
 def get_input_file():
     ## Check if input filename is provided, if not default to 'nas_Sor.in'
