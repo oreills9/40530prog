@@ -106,9 +106,10 @@ def convert_csr(csr, row_contents):
 
 def sor_calc(csr,maxits,tol,omega):
     its = 0
-
+    diverge_value = 0
+    diverging = False
     ## What does convergence?
-    while converging and its <= maxits:
+    while converging and not diverging and its <= maxits:
         x_zero = guess_x()
         x_one = new_x(x_zero,csr,omega)
 
@@ -117,6 +118,11 @@ def sor_calc(csr,maxits,tol,omega):
             return
         else: 
             converging = convergence_check(x_one, new_x)
+            cur_diff = get_abs_diff(new_x, x_one)
+            if diverge_value > cur_diff:
+                diverging = True
+            else:
+                diverge_value = cur_diff
 
     ## returns stop reason num its and x
 
@@ -149,6 +155,9 @@ def vector_norm(vector):
     else:
         return(math.sqrt(val))
 
+def get_abs_diff(cur_val, prev_val):
+    return(abs(cur_val - prev_val))
+
 def convergence_check(prev_x, cur_x):
     ## Cathal
     ## returns true if going good (converging towards a point)
@@ -157,7 +166,7 @@ def convergence_check(prev_x, cur_x):
     ## has to hold previous values
     ## check for diverging
     ## check for converging but not converged
-    x_diff = abs(cur_x - prev_x)
+    x_diff = get_abs_diff(cur_x, prev_x)
     tol = 4 * Em * abs(cur_x)
     if x_diff <= tol:
         return(False)
