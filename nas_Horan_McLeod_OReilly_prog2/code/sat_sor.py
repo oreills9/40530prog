@@ -59,7 +59,7 @@ def row_iterator(input_file):
                 csr = convert_csr(csr, formatted_line)
 
             line_count +=1
-
+        csr["row_start"].append(len(csr["val"])+1)
             ## Check line count N+2
     return(csr)
 
@@ -71,7 +71,7 @@ def row_check(row,row_number,N):
         output_results(STOP_REASON_INVALID_MATRIX, 100, 1, 1)
         return
 
-    for i in range(row_number):
+    for i in range(int(N)):
         elem = row[i]
         if i == row_number:
             d = abs(elem)
@@ -106,10 +106,9 @@ def convert_csr(csr, row_contents):
 
 def sor_calc(csr,maxits,tol,omega):
     its = 0
-
+    x_zero = guess_x(csr["N"])
     ## What does convergence?
     while converging and its <= maxits:
-        x_zero = guess_x()
         x_one = new_x(x_zero,csr,omega)
 
         if vector_norm(x_one) - vector_norm(x_zero) < "tol formula involving mach eps":
@@ -117,25 +116,30 @@ def sor_calc(csr,maxits,tol,omega):
             return
         else: 
             converging = convergence_check(x_one, new_x)
-
+            x_zero = x_one
+            its +=1
     ## returns stop reason num its and x
 
+def guess_x(i):
+    list_zeroes = [0] * i
+    return list_zeroes
+
 def new_x(current,csr,omega):
-    for i in range(csr["N"]):
-        ssum = sor_sum(initial,csr)
-        d = get_diagonal(csr,i)
-        current[i] += (omega * ((csr["B"][i]) - ssum)/d)
+    for i in range(0,csr["N"]):
+        sor_return = sor_sum(current,csr,i)
+        ssum = sor_return["sorSum"]
+        d = sor_return["diag"]
+        current[i] += (omega/d)*((csr["B"][i]) - ssum)
     return current
 
-def sor_sum(initial,csr):
-    ## it gets sum excluding diagonal * x
-    ## retuns this 
-    ## Cian
-    return
+def sor_sum(current,csr,i):
+    ssum = 0
+    for j in range(csr["row_start"][i]-1,csr["row_start"][i+1]-1):
+        ssum += csr["val"][j]*current[csr["col"][j]-1]
+        if csr["col"][j] == i:
+            d = csr["val"][j]
+    return {"sorSum": ssum, "diag": d}
 
-def get_diagonal():
-    ## Cian
-    return
 
 def vector_norm(vector):
     ## Cathal
