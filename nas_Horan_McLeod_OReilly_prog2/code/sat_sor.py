@@ -127,7 +127,7 @@ def sor_calc(csr,maxits,tol,omega):
         else: 
             converging = convergence_check(x_one, new_x)
             x_zero = x_one
-            x_zero_norm = vector_norm(x_zero)
+            x_zero_norm = x_one_norm
             its +=1
     
     if its > maxits:
