@@ -15,6 +15,10 @@ STOP_REASON_NOT_DIAG_DOM = 'Not Diagonally Dominant'
 
 Em = np.finfo(float).eps
 
+def get_tol(x):
+    tolerance = eps + 4*Em*abs(x)
+    return tolerance
+    
 def row_iterator(input_file):
     '''
     Input:
@@ -107,25 +111,36 @@ def convert_csr(csr, row_contents):
 def sor_calc(csr,maxits,tol,omega):
     its = 0
     x_zero = guess_x(csr["N"])
+    x_zero_norm = 0
     ## What does convergence?
-    while converging and its <= maxits:
+    while convergence_check and its <= maxits:
         x_one = new_x(x_zero,csr,omega)
-
-        if vector_norm(x_one) - vector_norm(x_zero) < "tol formula involving mach eps":
+        x_one_norm = vector_norm(x_one)
+        res_norm = residual_norm(csr,x_one)
+        
+        if x_one_norm - x_zero_norm < get_tol(x_one_norm):
             output_results(STOP_REASON_DIVERGENCE, maxits, tol, 1, numIts = its)
+            return
+        elif res_norm < get_tol(res_norm):
+            output_results(STOP_REASON_RES_CON, maxits, tol, 1, numIts = its)
             return
         else: 
             converging = convergence_check(x_one, new_x)
             x_zero = x_one
+            x_zero_norm = vector_norm(x_zero)
             its +=1
+    
+    if its > maxits:
+        output_results(STOP_REASON_MAX_ITS, maxits, tol, 1, numIts = its)
+        return
     ## returns stop reason num its and x
 
 def guess_x(i):
-    list_zeroes = [0] * i
+    list_zeroes = [0] * int(i)
     return list_zeroes
 
 def new_x(current,csr,omega):
-    for i in range(0,csr["N"]):
+    for i in range(0,int(csr["N"])):
         sor_return = sor_sum(current,csr,i)
         ssum = sor_return["sorSum"]
         d = sor_return["diag"]
@@ -136,10 +151,25 @@ def sor_sum(current,csr,i):
     ssum = 0
     for j in range(csr["row_start"][i]-1,csr["row_start"][i+1]-1):
         ssum += csr["val"][j]*current[csr["col"][j]-1]
-        if csr["col"][j] == i:
+        if csr["col"][j] == i+1:
             d = csr["val"][j]
     return {"sorSum": ssum, "diag": d}
 
+def residual_norm(csr,current):
+    product = prod_mat_vec(csr,current)
+    res = guess_x(csr["N"])
+    
+    for i in range(0,int(csr["N"])):
+        res[i] = csr["B"][i]-product[i]
+    res_norm = vector_norm(res)
+    return res_norm
+
+def prod_mat_vec(csr,current):
+    prod = guess_x(csr["N"])
+    for i in range(0,int(csr["N"])):
+        for j in range(csr["row_start"][i]-1,csr["row_start"][i+1]-1):
+            prod[i] += csr["val"][j]*current[csr["col"][j]-1]
+    return prod
 
 def vector_norm(vector):
     ## Cathal
