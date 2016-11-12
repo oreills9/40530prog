@@ -196,7 +196,7 @@ def convergence_check(prev_x, cur_x):
     ## check for converging but not converged
     print(cur_x)
     print(prev_x)
-    x_diff = abs(cur_x - prev_x)
+    x_diff = vector_norm(cur_x) - vector_norm(prev_x)
     tol = 4 * Em * abs(cur_x)
     if x_diff <= tol:
         return False
