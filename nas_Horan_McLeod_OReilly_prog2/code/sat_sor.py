@@ -124,14 +124,15 @@ def sor_calc(csr,maxits,omega):
             reason = STOP_REASON_RES_CON
         else: 
             converging = convergence_check(x_one, x_zero)
-            reason = STOP_REASON_DIVERGENCE
+            if converging:
+                reason = STOP_REASON_DIVERGENCE
             x_zero = x_one
             x_zero_norm = x_one_norm
         
         if i + 1 >= maxits:
             reason = STOP_REASON_MAX_ITS
         
-        if length(reason) > 0:
+        if len(reason) > 0:
             output_results(reason, maxits, xSeqTol, resSeqTol, numIts = i)
     
     ## returns stop reason num its and x
@@ -311,7 +312,7 @@ def output_results(stopReason, maxIts, xSeqTol, residualSeqTol, \
     sys.exit(0)
 
 if __name__ == '__main__':
-    doctest.testmod()
+    ##doctest.testmod()
     ## First confirm the file to read the data from
     input_file = get_input_file(sys.argv)
     csr = row_iterator(input_file)
