@@ -123,7 +123,7 @@ def sor_calc(csr,maxits,omega):
         elif res_norm < resSeqTol:
             reason = STOP_REASON_RES_CON
         else: 
-            converging = convergence_check(x_one, x_zero)
+            converging = convergence_check(x_one, x_zero, xSeqTol)
             if converging:
                 reason = STOP_REASON_DIVERGENCE
             x_zero = x_one
@@ -187,7 +187,7 @@ def vector_norm(vector):
     else:
         return(math.sqrt(val))
 
-def convergence_check(prev_x, cur_x):
+def convergence_check(prev_x, cur_x, tol):
     ## Cathal
     ## returns true if going good (converging towards a point)
     ## false if diverging
@@ -198,7 +198,6 @@ def convergence_check(prev_x, cur_x):
     print(cur_x)
     print(prev_x)
     x_diff = vector_norm(cur_x) - vector_norm(prev_x)
-    tol = 4 * Em * abs(cur_x)
     if x_diff <= tol:
         return False
     else:
