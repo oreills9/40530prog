@@ -1,6 +1,7 @@
 import math
 import numpy as np
 import sys
+import doctest
 
 ## Allowable reasons for exiting process
 STOP_REASON_X_SEQ_CON = 'x Sequence Convergence'
@@ -14,9 +15,11 @@ STOP_REASON_INVALID_MATRIX = 'Invalid Matrix Input'
 STOP_REASON_NOT_DIAG_DOM = 'Not Diagonally Dominant'
 
 Em = np.finfo(float).eps
+E = 1.0e-3
 
 def get_tol(x):
-    tolerance = eps + 4*Em*abs(x)
+    print('TEST' + str(E) )
+    tolerance = E + ( (4 * Em) * abs(x) )
     return tolerance
     
 def row_iterator(input_file):
@@ -103,30 +106,36 @@ def convert_csr(csr, row_contents):
 
     return csr
 
-def sor_calc(csr,maxits,tol,omega):
-    its = 0
+def sor_calc(csr,maxits,omega):
+
     x_zero = guess_x(csr["N"])
     x_zero_norm = 0
     ## What does convergence?
-    while convergence_check and its <= maxits:
+    for i in range (0, maxits):
         x_one = new_x(x_zero,csr,omega)
         x_one_norm = vector_norm(x_one)
         res_norm = residual_norm(csr,x_one)
+        xSeqTol = get_tol(x_one_norm)
+        resSeqTol = get_tol(res_norm)
         
-        if x_one_norm - x_zero_norm < get_tol(x_one_norm):
-            output_results(STOP_REASON_DIVERGENCE, maxits, tol, 1, numIts = its)
-        elif res_norm < get_tol(res_norm):
-            output_results(STOP_REASON_RES_CON, maxits, tol, 1, numIts = its)
+        if x_one_norm - x_zero_norm < xSeqTol:
+            reason = STOP_REASON_DIVERGENCE
+        elif res_norm < resSeqTol:
+            reason = STOP_REASON_RES_CON
         else: 
-            converging = convergence_check(x_one, new_x)
+            converging = convergence_check(x_one, x_zero)
+            reason = STOP_REASON_DIVERGENCE
             x_zero = x_one
             x_zero_norm = x_one_norm
-            its +=1
+        
+        if i + 1 >= maxits:
+            reason = STOP_REASON_MAX_ITS
+        
+        if length(reason) > 0:
+            output_results(reason, maxits, xSeqTol, resSeqTol, numIts = i)
     
-    if its > maxits:
-        output_results(STOP_REASON_MAX_ITS, maxits, tol, 1, numIts = its)
     ## returns stop reason num its and x
-
+    
 def guess_x(i):
     list_zeroes = [0] * int(i)
     return list_zeroes
@@ -136,7 +145,9 @@ def new_x(current,csr,omega):
         sor_return = sor_sum(current,csr,i)
         ssum = sor_return["sorSum"]
         d = sor_return["diag"]
+        print(sor_return)
         current[i] += (omega/d)*((csr["B"][i]) - ssum)
+        print('Current[i] ' + str(current[i]) )
     return current
 
 def sor_sum(current,csr,i):
@@ -183,12 +194,14 @@ def convergence_check(prev_x, cur_x):
     ## has to hold previous values
     ## check for diverging
     ## check for converging but not converged
+    print(cur_x)
+    print(prev_x)
     x_diff = abs(cur_x - prev_x)
     tol = 4 * Em * abs(cur_x)
     if x_diff <= tol:
-        return(False)
+        return False
     else:
-        return(True)
+        return True
 
 def get_input_file(args):
     """ 
@@ -298,13 +311,9 @@ def output_results(stopReason, maxIts, xSeqTol, residualSeqTol, \
     sys.exit(0)
 
 if __name__ == '__main__':
-    import doctest
     doctest.testmod()
     ## First confirm the file to read the data from
     input_file = get_input_file(sys.argv)
-    
     csr = row_iterator(input_file)
-    #csr = row_iterator('input_file_1.txt')
-    print(csr)
-    norm = vector_norm([1, 2, 3])
-    print(norm)
+    sor_calc(csr, 100, 1.2) 
+    
