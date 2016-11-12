@@ -48,13 +48,11 @@ def row_iterator(input_file):
                 csr["N"] = formatted_line[0]
                 if (csr["N"] == 0.0):
                     output_results(STOP_REASON_ZERO_MATRIX, 100, 1, 1)
-                    return
             ## The last line is the vector B
             elif line_count == csr["N"] + 1:
                 csr["B"] = formatted_line
                 if (len(csr['B']) != csr["N"]):
                     output_results(STOP_REASON_INVALID_MATRIX, 100, 1, 1)
-                    return
             ## All other lines are part of the matrix
             else:
                 ## Validate row length and matrix row requirements
@@ -73,7 +71,6 @@ def row_check(row,row_number,N):
 
     if(len(row)!= N):
         output_results(STOP_REASON_INVALID_MATRIX, 100, 1, 1)
-        return
 
     for i in range(int(N)):
         elem = row[i]
@@ -81,13 +78,11 @@ def row_check(row,row_number,N):
             d = abs(elem)
             if elem == 0.0:
                 output_results(STOP_REASON_ZERO_DIAGONAL, 100, 1, 1)
-                return
         else:
             running_sum += abs(elem)
     
     if d < running_sum: 
         output_results(STOP_REASON_NOT_DIAG_DOM, 100, 1, 1)
-        return
 
 def convert_csr(csr, row_contents):
     ## As strictly diagonally dominant, can assume each row has at least one elem.
@@ -120,10 +115,8 @@ def sor_calc(csr,maxits,tol,omega):
         
         if x_one_norm - x_zero_norm < get_tol(x_one_norm):
             output_results(STOP_REASON_DIVERGENCE, maxits, tol, 1, numIts = its)
-            return
         elif res_norm < get_tol(res_norm):
             output_results(STOP_REASON_RES_CON, maxits, tol, 1, numIts = its)
-            return
         else: 
             converging = convergence_check(x_one, new_x)
             x_zero = x_one
@@ -132,7 +125,6 @@ def sor_calc(csr,maxits,tol,omega):
     
     if its > maxits:
         output_results(STOP_REASON_MAX_ITS, maxits, tol, 1, numIts = its)
-        return
     ## returns stop reason num its and x
 
 def guess_x(i):
@@ -198,7 +190,7 @@ def convergence_check(prev_x, cur_x):
     else:
         return(True)
 
-def get_input_file():
+def get_input_file(args):
     """ 
     Checks to see if an input file is provided in the arguments of the class
     and if not, returns the default 'nas_Sor.in' file containing a sample 
@@ -206,14 +198,19 @@ def get_input_file():
     Arguments: None
     Returns: String
     
-    >>> get_input_file()
+    
+    >>> get_input_file([])
     'nas_Sor.in'
+    >>> get_input_file(['sat_sor.py'])
+    'nas_Sor.in'
+    >>> get_input_file(['sat_sor.py', 'nas_SOR_small_diag_dom.in'])
+    'nas_SOR_small_diag_dom.in'
     """
 
-    filename = 'nas_Sor.in' if len(sys.argv) < 2 else sys.argv[1]
+    filename = 'nas_Sor.in' if len(args) < 2 else args[1]
     return filename
     
-def get_output_file():
+def get_output_file(args):
     """ 
     Checks to see if an output file is provided in the arguments of the class
     and if not, returns the default 'nas_Sor.out' file which will be populated
@@ -221,11 +218,17 @@ def get_output_file():
     Arguments: None
     Returns: String
     
-    >>> get_output_file()
+    >>> get_output_file([])
     'nas_Sor.out'
+    >>> get_output_file(['sat_sor.py'])
+    'nas_Sor.out'
+    >>> get_output_file(['sat_sor.py', 'nas_SOR_small_diag_dom.in'])
+    'nas_Sor.out'
+    >>> get_output_file(['sat_sor.py', 'nas_SOR_small_diag_dom.in', 'test_output.out'])
+    'test_output.out'
     """
 
-    filename = 'nas_Sor.out' if len(sys.argv) < 3 else sys.argv[2]
+    filename = 'nas_Sor.out' if len(args) < 3 else args[2]
     return filename
     
 def output_results(stopReason, maxIts, xSeqTol, residualSeqTol, \
@@ -269,7 +272,7 @@ def output_results(stopReason, maxIts, xSeqTol, residualSeqTol, \
     Not Diagonally Dominant |       100       |      None      |  None   |        1         |          1          |
     """ 
     ## Confirm the filename of the output text    
-    output_file = get_output_file()  
+    output_file = get_output_file(sys.argv)  
     
     ## Open writable file
     file = open(output_file, 'w')
@@ -298,7 +301,7 @@ if __name__ == '__main__':
     import doctest
     doctest.testmod()
     ## First confirm the file to read the data from
-    input_file = get_input_file()
+    input_file = get_input_file(sys.argv)
     
     csr = row_iterator(input_file)
     #csr = row_iterator('input_file_1.txt')
