@@ -16,9 +16,9 @@ STOP_REASON_NOT_DIAG_DOM = 'Not Diagonally Dominant'
 
 Em = np.finfo(float).eps
 E = 1.0e-3
+maxIts = 100
 
 def get_tol(x):
-    print('TEST' + str(E) )
     tolerance = E + ( (4 * Em) * abs(x) )
     return tolerance
     
@@ -44,18 +44,19 @@ def row_iterator(input_file):
     with open(input_file, "r") as infile:
         for line in infile:
             ## Get line in list format, remove carriage returns and commas
+            #print(line.rstrip().rsplit(','))
             formatted_line = ([float(x) for x in line.rstrip().rsplit(',')])
 
             ## The first line is the matrix size so not part of the matrix
             if line_count == 0:
                 csr["N"] = formatted_line[0]
                 if (csr["N"] == 0.0):
-                    output_results(STOP_REASON_ZERO_MATRIX, 100, 1, 1)
+                    output_results(STOP_REASON_ZERO_MATRIX, maxIts)
             ## The last line is the vector B
             elif line_count == csr["N"] + 1:
                 csr["B"] = formatted_line
                 if (len(csr['B']) != csr["N"]):
-                    output_results(STOP_REASON_INVALID_MATRIX, 100, 1, 1)
+                    output_results(STOP_REASON_INVALID_MATRIX, maxIts)
             ## All other lines are part of the matrix
             else:
                 ## Validate row length and matrix row requirements
@@ -73,23 +74,23 @@ def row_check(row,row_number,N):
     d = 0
 
     if(len(row)!= N):
-        output_results(STOP_REASON_INVALID_MATRIX, 100, 1, 1)
+        output_results(STOP_REASON_INVALID_MATRIX, maxIts)
 
     for i in range(int(N)):
         elem = row[i]
         if i == row_number:
             d = abs(elem)
             if elem == 0.0:
-                output_results(STOP_REASON_ZERO_DIAGONAL, 100, 1, 1)
+                output_results(STOP_REASON_ZERO_DIAGONAL, maxIts)
         else:
             running_sum += abs(elem)
     
-    if d < running_sum: 
-        output_results(STOP_REASON_NOT_DIAG_DOM, 100, 1, 1)
+    ##if d < running_sum: 
+    ##    output_results(STOP_REASON_NOT_DIAG_DOM, 100, 1, 1)
 
 def convert_csr(csr, row_contents):
     ## As strictly diagonally dominant, can assume each row has at least one elem.
-    print(len(csr["col"])+1)
+    #print(len(csr["col"])+1)
     csr["row_start"].append(len(csr["col"])+1)
 
     for index, item in enumerate(row_contents):
@@ -106,19 +107,23 @@ def convert_csr(csr, row_contents):
 
     return csr
 
-def sor_calc(csr,maxits,omega):
+def sor_calc(csr,omega):
         
     reason = ''
     x_zero = guess_x(csr["N"])
     x_zero_norm = 0
     ## What does convergence?
-    for i in range (0, maxits):
+    for i in range (1, maxIts + 1):
         x_one = new_x(x_zero,csr,omega)
         x_one_norm = vector_norm(x_one)
         res_norm = residual_norm(csr,x_one)
         xSeqTol = get_tol(x_one_norm)
         resSeqTol = get_tol(res_norm)
         
+        print( str(x_one_norm))
+        print( str(x_zero_norm))
+        print( str(xSeqTol))
+        print( str(x_one_norm - x_zero_norm < xSeqTol) )
         if x_one_norm - x_zero_norm < xSeqTol:
             reason = STOP_REASON_DIVERGENCE
         elif res_norm < resSeqTol:
@@ -131,11 +136,11 @@ def sor_calc(csr,maxits,omega):
             x_zero = x_one
             x_zero_norm = x_one_norm
         
-        if i + 1 >= maxits:
-            reason = STOP_REASON_MAX_ITS
-        
         if len(reason) > 0:
-            output_results(reason, maxits, xSeqTol, resSeqTol, numIts = i, result = x_zero)
+            output_results(reason, maxIts, xSeqTol, resSeqTol, numIts = i, result = x_zero, epsilon = Em)
+            
+    output_results(STOP_REASON_MAX_ITS, maxIts, xSeqTol, resSeqTol, numIts = maxIts, result = x_zero, epsilon = Em)       
+    
     
     ## returns stop reason num its and x
     
@@ -148,9 +153,9 @@ def new_x(current,csr,omega):
         sor_return = sor_sum(current,csr,i)
         ssum = sor_return["sorSum"]
         d = sor_return["diag"]
-        print(sor_return)
+        #print(sor_return)
         current[i] += (omega/d)*((csr["B"][i]) - ssum)
-        print('Current[i] ' + str(current[i]) )
+        #print('Current[i] ' + str(current[i]) )
     return current
 
 def sor_sum(current,csr,i):
@@ -197,8 +202,8 @@ def convergence_check(prev_x, cur_x, tol):
     ## has to hold previous values
     ## check for diverging
     ## check for converging but not converged
-    print(cur_x)
-    print(prev_x)
+    #print(cur_x)
+    #print(prev_x)
     x_diff = vector_norm(cur_x) - vector_norm(prev_x)
     if x_diff <= tol:
         return False
@@ -246,7 +251,7 @@ def get_output_file(args):
     filename = 'nas_Sor.out' if len(args) < 3 else args[2]
     return filename
     
-def output_results(stopReason, maxIts, xSeqTol, residualSeqTol, \
+def output_results(stopReason, maxIts, xSeqTol = None, residualSeqTol = None, \
                    numIts = None, result = None, epsilon = None):
     """ 
     Outputs the results (or reasons for failure) for the Sparse SOR function 
@@ -283,8 +288,8 @@ def output_results(stopReason, maxIts, xSeqTol, residualSeqTol, \
     """
     """    
     >>> output_results(STOP_REASON_NOT_DIAG_DOM, 100, 1, 1)
-        Stopping Reason     | Max. Iterations | No. Iterations | Epsilon | X Seq. Tolerance | Res. Seq. Tolerance |
-    Not Diagonally Dominant |       100       |      None      |  None   |        1         |          1          |
+        Stopping Reason     | Max. Iterations | No. Iterations |      Epsilon      |  X Seq. Tolerance  | Res. Seq. Tolerance |
+    Not Diagonally Dominant |       100       |      None      |       None        |         1          |          1          |
     """ 
     ## Confirm the filename of the output text    
     output_file = get_output_file(sys.argv)  
@@ -294,12 +299,12 @@ def output_results(stopReason, maxIts, xSeqTol, residualSeqTol, \
     
     ##Generate headings line
     headings = '     Stopping Reason     | Max. Iterations |' \
-                ' No. Iterations | Epsilon |' \
-                ' X Seq. Tolerance | Res. Seq. Tolerance |'
+                ' No. Iterations |      Epsilon      |' \
+                '  X Seq. Tolerance  | Res. Seq. Tolerance |'
     print(headings)
     
     ##Generate formatted stastical data
-    stats = "{:^25}|{:^17}|{:^16}|{:^9}|{:^18}|{:^21}|" \
+    stats = "{:^25}|{:^17}|{:^16}|{:^19}|{:^20}|{:^21}|" \
         .format(stopReason, str(maxIts), str(numIts), str(epsilon), str(xSeqTol), str(residualSeqTol) )
     print(stats)
     file.write(headings + '\n')
@@ -317,5 +322,5 @@ if __name__ == '__main__':
     ## First confirm the file to read the data from
     input_file = get_input_file(sys.argv)
     csr = row_iterator(input_file)
-    sor_calc(csr, 100, 1.2) 
+    sor_calc(csr, 1.2) 
     
