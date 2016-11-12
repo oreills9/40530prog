@@ -107,7 +107,8 @@ def convert_csr(csr, row_contents):
     return csr
 
 def sor_calc(csr,maxits,omega):
-
+        
+    reason = ''
     x_zero = guess_x(csr["N"])
     x_zero_norm = 0
     ## What does convergence?
@@ -122,6 +123,7 @@ def sor_calc(csr,maxits,omega):
             reason = STOP_REASON_DIVERGENCE
         elif res_norm < resSeqTol:
             reason = STOP_REASON_RES_CON
+            
         else: 
             converging = convergence_check(x_one, x_zero, xSeqTol)
             if converging:
@@ -133,7 +135,7 @@ def sor_calc(csr,maxits,omega):
             reason = STOP_REASON_MAX_ITS
         
         if len(reason) > 0:
-            output_results(reason, maxits, xSeqTol, resSeqTol, numIts = i)
+            output_results(reason, maxits, xSeqTol, resSeqTol, numIts = i, result = x_zero)
     
     ## returns stop reason num its and x
     
@@ -305,8 +307,8 @@ def output_results(stopReason, maxIts, xSeqTol, residualSeqTol, \
     
     if stopReason in (STOP_REASON_X_SEQ_CON, STOP_REASON_RES_CON, STOP_REASON_MAX_ITS ):
         ## Only print results when appropriate to do so        
-        print('Results: ' + result)
-        file.write('Results: ' + result)
+        print('Results: %s' % result)
+        file.write('Results: %s' % result)
     file.close()
     sys.exit(0)
 
