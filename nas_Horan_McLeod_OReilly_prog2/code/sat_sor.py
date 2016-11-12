@@ -12,10 +12,11 @@ STOP_REASON_OTHER = 'Cannot Proceed'
 STOP_REASON_ZERO_MATRIX = 'Zero Matrix Size'
 STOP_REASON_INVALID_MATRIX = 'Invalid Matrix Input'
 STOP_REASON_NOT_DIAG_DOM = 'Not Diagonally Dominant'
-
+eps = 10**-3
 Em = np.finfo(float).eps
 
 def get_tol(x):
+    print(eps)
     tolerance = eps + 4*Em*abs(x)
     return tolerance
     
@@ -183,7 +184,7 @@ def convergence_check(prev_x, cur_x):
     ## has to hold previous values
     ## check for diverging
     ## check for converging but not converged
-    x_diff = abs(cur_x - prev_x)
+    x_diff = vector_norm(cur_x) - vector_norm(prev_x)
     tol = get_tol(cur_x)
     if x_diff <= tol:
         return(False)
