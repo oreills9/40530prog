@@ -184,7 +184,7 @@ def convergence_check(prev_x, cur_x):
     ## check for diverging
     ## check for converging but not converged
     x_diff = abs(cur_x - prev_x)
-    tol = 4 * Em * abs(cur_x)
+    tol = get_tol(cur_x)
     if x_diff <= tol:
         return(False)
     else:
