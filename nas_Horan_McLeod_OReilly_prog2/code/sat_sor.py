@@ -1,6 +1,7 @@
 import math
 import numpy as np
 import sys
+
 import doctest
 
 ## Allowable reasons for exiting process
@@ -89,7 +90,7 @@ def row_check(row,row_number,N):
 
 def convert_csr(csr, row_contents):
     ## As strictly diagonally dominant, can assume each row has at least one elem.
-    print(len(csr["col"])+1)
+    #print(len(csr["col"])+1)
     csr["row_start"].append(len(csr["col"])+1)
 
     for index, item in enumerate(row_contents):
