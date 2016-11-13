@@ -1,5 +1,6 @@
 import math
 from lib.globals import Globals
+from lib.output import Output
 
 class SorCalc:
     '''
@@ -8,12 +9,14 @@ class SorCalc:
      :param omega: relaxation factor
      :return:
     '''
-    def __init__(self, csr, maxits, omega):
+    def __init__(self, csr, maxits, omega, output_file):
         self.maxits = maxits
         self.csr = csr
         self.omega = omega
+        self.output_file = output_file
 
     def sor_calc(self):
+        output_file = Output()
         reason = ''
         x_zero = self.guess_x(self.csr["N"])
         x_zero_norm = 0
@@ -41,7 +44,8 @@ class SorCalc:
                 reason = Globals.STOP_REASON_MAX_ITS
 
             if len(reason) > 0:
-                output_results(reason, self.maxits, xSeqTol, resSeqTol, numIts=i, result=x_zero)
+                output_file.output_results(self.output_file, reason, self.maxits, xSeqTol, resSeqTol, \
+                                           numIts=i, result=x_zero)
 
     def guess_x(self, i):
         '''
