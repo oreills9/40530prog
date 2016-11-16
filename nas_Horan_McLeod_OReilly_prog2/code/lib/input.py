@@ -1,11 +1,9 @@
 from lib.globals import Globals
+from lib.output import Output
 
 class Input:
 
-    def __init__(self, input_file):
-        self.input_file = Globals.FILE_DIR + '/' + input_file
-
-    def row_iterator(self):
+    def __init__(self, input_file, output_file):
         '''
         Input:
         File with following format:
@@ -15,14 +13,14 @@ class Input:
         Output:
         Dictionary with format:
         {"val": [], "col": [], "row_start": [], "B" = [], "N" = 0.0}
+        :param input_file: File with matrix, b vector
+        :param output_file: Location of output file
         '''
+        self.input_file = Globals.FILE_DIR + '/' + input_file
+        self.output_file = output_file
 
+    def row_iterator(self):
         csr = {"val": [], "col": [], "row_start": [], "B": [], "N": 0.0}
-
-        ## We want to perform as many of the checks and functions during
-        ## the single iterations as possible. As we iterate through the input
-        ## file we need populate the csr dict with the matrix size and the
-        ## matrix values in csr format and the B vector on the last line
         line_count = 0
         with open(self.input_file, "r") as infile:
             for line in infile:
@@ -33,12 +31,12 @@ class Input:
                 if line_count == 0:
                     csr["N"] = formatted_line[0]
                     if (csr["N"] == 0.0):
-                        output_results(STOP_REASON_ZERO_MATRIX, 100, 1, 1)
+                        Output().output_results(STOP_REASON_ZERO_MATRIX, 100, 1, 1)
                 ## The last line is the vector B
                 elif line_count == csr["N"] + 1:
                     csr["B"] = formatted_line
                     if (len(csr['B']) != csr["N"]):
-                        output_results(STOP_REASON_INVALID_MATRIX, 100, 1, 1)
+                        Output().output_results(STOP_REASON_INVALID_MATRIX, 100, 1, 1)
                 ## All other lines are part of the matrix
                 else:
                     ## Validate row length and matrix row requirements
@@ -62,19 +60,19 @@ class Input:
         d = 0
 
         if (len(row) != N):
-            output_results(STOP_REASON_INVALID_MATRIX, 100, 1, 1)
+            Output().output_results(STOP_REASON_INVALID_MATRIX, 100, 1, 1)
 
         for i in range(int(N)):
             elem = row[i]
             if i == row_number:
                 d = abs(elem)
                 if elem == 0.0:
-                    output_results(STOP_REASON_ZERO_DIAGONAL, 100, 1, 1)
+                    Output().output_results(STOP_REASON_ZERO_DIAGONAL, 100, 1, 1)
             else:
                 running_sum += abs(elem)
 
         if d < running_sum:
-            output_results(STOP_REASON_NOT_DIAG_DOM, 100, 1, 1)
+            Output().output_results(STOP_REASON_NOT_DIAG_DOM, 100, 1, 1)
 
     def convert_csr(self, csr, row_contents):
         '''

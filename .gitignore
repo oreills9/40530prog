@@ -1,1 +1,4 @@
 *.out
+bs_error
+nas_Horan_McLeod_OReilly_prog2/code/lib/__pycache__/*
+nas_Horan_McLeod_OReilly_prog2/.idea/
