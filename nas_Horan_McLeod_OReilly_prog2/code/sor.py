@@ -16,13 +16,11 @@ output_file = Output()
 matrix_check = input.row_iterator()
 if matrix_check.stopReason:
     # Exit condition is true so exit here
-    print('check %s' % matrix_check.stopReason)
     output_file.output_results(args.outfile, matrix_check.stopReason, args.maxits, 0, 0)
 else:
     # Matrix is valid so proceed with SOR calculation
     sor = SorCalc(matrix_check.csr, args.maxits, args.omega)
     sor_res = sor.sor_calc()
-    print('result %s' % sor_res.stopReason)
     output_file.output_results(args.outfile, sor_res.stopReason, args.maxits,
                                sor_res.xSeqTol, sor_res.residualSeqTol,
                                sor_res.numIts, sor_res.x_zero, sor_res.epsilon)
