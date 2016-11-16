@@ -1,6 +1,6 @@
 import math
 from lib.globals import Globals
-from lib.output import Output
+from lib.output_object import OutputObject
 
 class SorCalc:
     '''
@@ -9,43 +9,43 @@ class SorCalc:
      :param omega: relaxation factor
      :return:
     '''
-    def __init__(self, csr, maxits, omega, output_file):
+    def __init__(self, csr, maxits, omega):
         self.maxits = maxits
         self.csr = csr
         self.omega = omega
-        self.output_file = output_file
 
     def sor_calc(self):
-        output_file = Output()
-        reason = ''
-        x_zero = self.guess_x(self.csr["N"])
+        res = OutputObject()
+        res.exit_state = False
+        res.x_zero = self.guess_x(self.csr["N"])
         x_zero_norm = 0
-        ## What does convergence?
+        res.maxits = self.maxits
         for i in range(0, self.maxits):
-            x_one = self.new_x(x_zero)
+            res.numIts = i
+            x_one = self.new_x(res.x_zero)
             x_one_norm = self.vector_norm(x_one)
             res_norm = self.residual_norm(x_one)
-            xSeqTol = self.get_tol(x_one_norm)
-            resSeqTol = self.get_tol(res_norm)
-
-            if x_one_norm - x_zero_norm < xSeqTol:
-                reason = Globals.STOP_REASON_DIVERGENCE
-            elif res_norm < resSeqTol:
-                reason = Globals.STOP_REASON_RES_CON
-
+            res.xSeqTol = self.get_tol(x_one_norm)
+            res.residualSeqTol = self.get_tol(res_norm)
+            if x_one_norm - x_zero_norm < res.xSeqTol:
+                res.stopReason = Globals.STOP_REASON_DIVERGENCE
+                res.exit_state = True
+            elif res_norm < res.residualSeqTol:
+                res.stopReason = Globals.STOP_REASON_RES_CON
+                res.exit_state = True
             else:
-                converging = self.convergence_check(x_one, x_zero, xSeqTol)
+                converging = self.convergence_check(x_one, res.x_zero, res.xSeqTol)
                 if converging:
-                    reason = Globals.STOP_REASON_DIVERGENCE
-                x_zero = x_one
+                    res.stopReason = Globals.STOP_REASON_X_SEQ_CON
+                    res.exit_state = True
+                res.x_zero = x_one
                 x_zero_norm = x_one_norm
-
-            if i + 1 >= self.maxits:
-                reason = Globals.STOP_REASON_MAX_ITS
-
-            if len(reason) > 0:
-                output_file.output_results(self.output_file, reason, self.maxits, xSeqTol, resSeqTol, \
-                                           numIts=i, result=x_zero)
+            if res.exit_state:
+                return(res)
+        # At this point we can asusme it has reached maxits
+        res.stopReason = Globals.STOP_REASON_MAX_ITS
+        res.exit_state = True
+        return(res)
 
     def guess_x(self, i):
         '''
