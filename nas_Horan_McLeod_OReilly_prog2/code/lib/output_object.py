@@ -15,3 +15,5 @@ class OutputObject(object):
     epsilon = None
     exit_state = True
     csr = {}
+    check_diag = True
+    prev_diff = 0

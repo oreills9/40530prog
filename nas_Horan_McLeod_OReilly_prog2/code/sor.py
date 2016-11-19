@@ -27,4 +27,4 @@ else:
     sor_res = sor.sor_calc()
     output_file.output_results(args.outfile, sor_res.stopReason, args.maxits,
                                sor_res.xSeqTol, sor_res.residualSeqTol,
-                               sor_res.numIts, sor_res.x_zero, sor_res.epsilon)
+                               sor_res.numIts, sor_res.x_zero, Globals.Em)

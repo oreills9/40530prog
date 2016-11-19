@@ -16,34 +16,45 @@ class SorCalc:
 
     def sor_calc(self):
         res = OutputObject()
+        # Assume exit state false at start and set when exiting
         res.exit_state = False
-        res.x_zero = self.guess_x(self.csr["N"])
+        # Set initial vector guess to zero for previous calculation
+        x_zero = self.guess_x(self.csr["N"])
+        # Initial norm will be zero also
         x_zero_norm = 0
+        # Need to remember previous X diff value for divergence check
+        # Since initial guess is zero we need to ensure divergence check
+        # will not pass divergence check as X_zero will be 0
+        res.prev_diff = self.vector_norm(self.new_x(x_zero))
+        # Set maxits here so it is in object whenever returned
         res.maxits = self.maxits
         for i in range(0, self.maxits):
             res.numIts = i
-            x_one = self.new_x(res.x_zero)
-            x_one_norm = self.vector_norm(x_one)
-            res_norm = self.residual_norm(x_one)
+            res.x_one = self.new_x(x_zero)
+            #print(res.x_one)
+            x_one_norm = self.vector_norm(res.x_one)
+            res_norm = self.residual_norm(res.x_one)
             res.xSeqTol = self.get_tol(x_one_norm)
             res.residualSeqTol = self.get_tol(res_norm)
-            print(x_one_norm, x_zero_norm, (x_one_norm - x_zero_norm), res.xSeqTol)
-            if abs(x_one_norm - x_zero_norm) < res.xSeqTol:
+            #if x_one_norm - x_zero_norm > res.prev_diff:
+            cur_diff = abs(x_one_norm - x_zero_norm)
+            if cur_diff > res.prev_diff:
                 res.stopReason = Globals.STOP_REASON_DIVERGENCE
                 res.exit_state = True
             elif res_norm < res.residualSeqTol:
                 res.stopReason = Globals.STOP_REASON_RES_CON
                 res.exit_state = True
             else:
-                converging = self.convergence_check(x_one, res.x_zero, res.xSeqTol)
+                converging = self.convergence_check(x_zero, res.x_one, res.xSeqTol)
                 if converging:
                     res.stopReason = Globals.STOP_REASON_X_SEQ_CON
                     res.exit_state = True
-                res.x_zero = x_one
+                x_zero = res.x_one
                 x_zero_norm = x_one_norm
+                res.prev_diff = cur_diff
             if res.exit_state:
                 return(res)
-        # At this point we can asusme it has reached maxits
+        # At this point we can assume it has reached maxits
         res.stopReason = Globals.STOP_REASON_MAX_ITS
         res.exit_state = True
         return(res)
@@ -58,15 +69,17 @@ class SorCalc:
 
     def new_x(self, current):
         '''
+        Calculating new or current X vector
         :param current: current X vector
         :return: new X vector
         '''
+        local_current = current[:]
         for i in range(0, int(self.csr["N"])):
-            sor_return = self.sor_sum(current, i)
+            sor_return = self.sor_sum(local_current, i)
             ssum = sor_return["sorSum"]
             d = sor_return["diag"]
-            current[i] += (self.omega / d) * ((self.csr["B"][i]) - ssum)
-        return current
+            local_current[i] += (self.omega / d) * ((self.csr["B"][i]) - ssum)
+        return local_current
 
     def sor_sum(self, current, i):
         '''
@@ -131,8 +144,8 @@ class SorCalc:
         :param tol: The tolerance given the current X values
         :return: boolean
         '''
-        x_diff = self.vector_norm(cur_x) - self.vector_norm(prev_x)
-        if x_diff <= tol:
+        x_diff = abs(self.vector_norm(cur_x) - self.vector_norm(prev_x))
+        if x_diff > tol:
             return False
         else:
             return True

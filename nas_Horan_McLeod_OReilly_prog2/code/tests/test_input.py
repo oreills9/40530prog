@@ -35,7 +35,7 @@ class TestInput(unittest.TestCase):
         sor = SorCalc(matrix_check.csr, 100, 1.2)
         sor_res = sor.sor_calc()
         # Verify stop reason
-        self.assertEqual(sor_res.stopReason, Globals.STOP_REASON_DIVERGENCE)
+        self.assertEqual(sor_res.stopReason, Globals.STOP_REASON_X_SEQ_CON)
 
     def test_small_diag_dom_LT_dom(self):
         input = Input("nas_SOR_small_diag_dom_LT_dom.in")
@@ -45,25 +45,34 @@ class TestInput(unittest.TestCase):
         sor = SorCalc(matrix_check.csr, 100, 1.2)
         sor_res = sor.sor_calc()
         # Verify stop reason
-        self.assertEqual(sor_res.stopReason, Globals.STOP_REASON_DIVERGENCE)
+        self.assertEqual(sor_res.stopReason, Globals.STOP_REASON_X_SEQ_CON)
 
     def test_sor_eigen_gt_one(self):
+        Globals.check_diag = False
         input = Input("nas_SOR_Eigen_gt_1.in")
         matrix_check = input.row_iterator()
+        sor = SorCalc(matrix_check.csr, 100, 1.2)
+        sor_res = sor.sor_calc()
         # Verify stop reason
-        self.assertEqual(matrix_check.stopReason, Globals.STOP_REASON_NOT_DIAG_DOM)
+        self.assertEqual(sor_res.stopReason, Globals.STOP_REASON_DIVERGENCE)
 
     def test_sor_eigen_lt_one(self):
+        Globals.check_diag = False
         input = Input("nas_SOR_Eigen_lt_1.in")
         matrix_check = input.row_iterator()
+        sor = SorCalc(matrix_check.csr, 100, 1.2)
+        sor_res = sor.sor_calc()
         # Verify stop reason
-        self.assertEqual(matrix_check.stopReason, Globals.STOP_REASON_NOT_DIAG_DOM)
+        self.assertEqual(sor_res.stopReason, Globals.STOP_REASON_RES_CON)
 
     def test_sor_transpose_eigen_lt_one(self):
-        input = Input("nas_SOR_Eigen_lt_1.in")
+        Globals.check_diag = False
+        input = Input("nas_SOR_transpose.in")
         matrix_check = input.row_iterator()
+        sor = SorCalc(matrix_check.csr, 100, 1.2)
+        sor_res = sor.sor_calc()
         # Verify stop reason
-        self.assertEqual(matrix_check.stopReason, "TRANSPOSE?")
+        self.assertEqual(sor_res.stopReason, Globals.STOP_REASON_RES_CON)
 
     def test_large_diag_dom(self):
         input = Input("nas_SOR_large.in")
@@ -73,8 +82,7 @@ class TestInput(unittest.TestCase):
         sor = SorCalc(matrix_check.csr, 100, 1.2)
         sor_res = sor.sor_calc()
         # Verify stop reason
-        self.assertEqual(sor_res.stopReason, Globals.STOP_REASON_DIVERGENCE)
-
+        self.assertEqual(sor_res.stopReason, Globals.STOP_REASON_RES_CON)
 
 if __name__ == '__main__':
     unittest.main()

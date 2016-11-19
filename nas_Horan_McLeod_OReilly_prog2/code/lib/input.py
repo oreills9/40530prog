@@ -79,7 +79,7 @@ class Input:
                     return (res)
             else:
                 running_sum += abs(elem)
-        if d < running_sum:
+        if (d < running_sum) and Globals.check_diag and False:
             res.stopReason = Globals.STOP_REASON_NOT_DIAG_DOM
             res.exit_state = True
             return (res)
