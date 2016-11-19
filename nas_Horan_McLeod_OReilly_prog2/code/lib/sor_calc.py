@@ -27,7 +27,8 @@ class SorCalc:
             res_norm = self.residual_norm(x_one)
             res.xSeqTol = self.get_tol(x_one_norm)
             res.residualSeqTol = self.get_tol(res_norm)
-            if x_one_norm - x_zero_norm < res.xSeqTol:
+            print(x_one_norm, x_zero_norm, (x_one_norm - x_zero_norm), res.xSeqTol)
+            if abs(x_one_norm - x_zero_norm) < res.xSeqTol:
                 res.stopReason = Globals.STOP_REASON_DIVERGENCE
                 res.exit_state = True
             elif res_norm < res.residualSeqTol:
@@ -64,9 +65,7 @@ class SorCalc:
             sor_return = self.sor_sum(current, i)
             ssum = sor_return["sorSum"]
             d = sor_return["diag"]
-            print(sor_return)
             current[i] += (self.omega / d) * ((self.csr["B"][i]) - ssum)
-            print('Current[i] ' + str(current[i]))
         return current
 
     def sor_sum(self, current, i):
@@ -99,6 +98,7 @@ class SorCalc:
 
     def prod_mat_vec(self, current):
         '''
+        Get the product of the matrix and the vector for residual calculation
         :param current: current X vector
         :return: list of product values
         '''

@@ -2,6 +2,7 @@ import argparse
 from lib.input import Input
 from lib.output import Output
 from lib.sor_calc import SorCalc
+from lib.globals import Globals
 
 parser = argparse.ArgumentParser(description='SOR Calculator')
 
@@ -9,8 +10,11 @@ parser.add_argument('--infile', default='nas_SOR.in', type=str)
 parser.add_argument('--outfile', default='nas_Sor.out', type=str)
 parser.add_argument('--maxits', default=100, type=int)
 parser.add_argument('--omega', default=1.2, type=float)
-args = parser.parse_args()
+parser.add_argument('--tol', default=Globals.E, type=float)
 
+args = parser.parse_args()
+# Set tolerance value
+Globals.E = args.tol
 input = Input(args.infile)
 output_file = Output()
 matrix_check = input.row_iterator()
