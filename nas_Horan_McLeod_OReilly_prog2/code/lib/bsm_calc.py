@@ -43,8 +43,9 @@ class BsmCalc:
             entry_count += 1
 			
             #populate 1st equation for all rows, bar the first row in the matrix
-            previous = self.tridiagprevious(n, k)            
+            
             if n != 1:
+                previous = self.tridiagprevious(n, k)                
                 csr["col"].insert(0, n - 1)
                 csr["val"].insert(0, previous)
                 bValue = bValue / (previous + present + future) 
