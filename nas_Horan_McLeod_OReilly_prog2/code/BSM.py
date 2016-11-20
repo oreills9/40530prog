@@ -21,7 +21,6 @@ output_file = Output()
 
 bsm = BsmCalc(args.strikeprice, args.time, args.volatility, args.rate, args.duration) 
 bsm_res = bsm.bsm_calc()
-print(bsm_res)
 
 sor = SorCalc(bsm_res, args.maxits, args.omega)
 sor_res = sor.sor_calc()

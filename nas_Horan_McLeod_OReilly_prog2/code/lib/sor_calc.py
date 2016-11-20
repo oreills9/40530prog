@@ -1,6 +1,7 @@
 import math
 from lib.globals import Globals
 from lib.output_object import OutputObject
+import numpy as np
 
 class SorCalc:
     '''
@@ -31,7 +32,6 @@ class SorCalc:
         for i in range(0, self.maxits):
             res.numIts = i
             res.x_one = self.new_x(x_zero)
-            #print(res.x_one)
             x_one_norm = self.vector_norm(res.x_one)
             res_norm = self.residual_norm(res.x_one)
             res.xSeqTol = self.get_tol(x_one_norm)
@@ -144,6 +144,7 @@ class SorCalc:
         :param tol: The tolerance given the current X values
         :return: boolean
         '''
+        #print("prev %s cur %s tol %s" %(prev_x, cur_x, tol))
         x_diff = abs(self.vector_norm(cur_x) - self.vector_norm(prev_x))
         if x_diff > tol:
             return False
@@ -156,5 +157,5 @@ class SorCalc:
         :param vector_norm: norm of current X vector
         :return:
         '''
-        tolerance = Globals.E + ((4 * Globals.Em) * abs(vector_norm))
+        tolerance = (Globals.E) + ((4 * Globals.Em) * abs(vector_norm))
         return tolerance
