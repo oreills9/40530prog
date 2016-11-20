@@ -7,10 +7,10 @@ from lib.globals import Globals
 parser = argparse.ArgumentParser(description='BSM Calculator')
 
 parser.add_argument('-s', '--strikeprice', default=10, type=float)
-parser.add_argument('-ti', '--time', default=1, type=float)
+parser.add_argument('-ti', '--time', default=5, type=float)
 parser.add_argument('-v', '--volatility', default=0.2, type=float)
 parser.add_argument('-r', '--rate', default=0.02, type=float)
-parser.add_argument('-i', '--intervals', default=100, type=int)
+parser.add_argument('-i', '--intervals', default=10, type=int)
 parser.add_argument('-m', '--maxits', default=100, type=int)
 parser.add_argument('-o', '--omega', default=1.2, type=float)
 parser.add_argument('-to', '--tolerance', default=Globals.E, type=float)
