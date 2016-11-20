@@ -21,11 +21,10 @@ class Output:
 
             ## Open writable file
             file = open(output_file, 'w')
-            print(result)
 
             ##Generate headings line
             headings = '     Stopping Reason     | Max. Iterations |' \
-                       ' No. Iterations |      Epsilon      |' \
+                       ' No. Iterations |  Machine Epsilon  |' \
                        ' X Seq. Tolerance | Res. Seq. Tolerance |'
             print(headings)
 
