@@ -6,11 +6,11 @@ from lib.globals import Globals
 
 parser = argparse.ArgumentParser(description='SOR Calculator')
 
-parser.add_argument('--infile', default='nas_SOR.in', type=str)
-parser.add_argument('--outfile', default='nas_Sor.out', type=str)
-parser.add_argument('--maxits', default=100, type=int)
-parser.add_argument('--omega', default=1.2, type=float)
-parser.add_argument('--tol', default=Globals.E, type=float)
+parser.add_argument('-i', '--infile', default='nas_SOR.in', type=str)
+parser.add_argument('-ou', '--outfile', default='nas_Sor.out', type=str)
+parser.add_argument('-m', '--maxits', default=100, type=int)
+parser.add_argument('-om', '--omega', default=1.2, type=float)
+parser.add_argument('-t', '--tol', default=Globals.E, type=float)
 parser.add_argument('--check_diag', action='store_false')
 
 args = parser.parse_args()
