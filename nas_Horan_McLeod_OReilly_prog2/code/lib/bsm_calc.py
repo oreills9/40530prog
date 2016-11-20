@@ -18,6 +18,8 @@ class BsmCalc:
     def bsm_calc(self):
         csr = {"val": [], "col": [], "row_start": [], "B": [], "N": 0.0}
         dim = int((self.intervals * self.T) - 1)
+        if dim <= 1:
+            return csr
         csr["B"].insert(0, self.Smax)    
         csr["N"] = dim
         csr["row_start"].insert(0, (dim * 3) - 1) #fill last value for rowstart

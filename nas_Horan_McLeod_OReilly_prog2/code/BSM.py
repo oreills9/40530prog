@@ -25,6 +25,9 @@ output_file = Output()
 
 bsm = BsmCalc(args.strikeprice, args.time, args.volatility, args.rate, args.intervals) 
 bsm_res = bsm.bsm_calc()
+if bsm_res["N"] <= 1:
+    output_file.output_results(args.file, Globals.STOP_REASON_OTHER, args.maxits,
+                               Globals.E, Globals.E)
 
 sor = SorCalc(bsm_res, args.maxits, args.omega)
 sor_res = sor.sor_calc()
