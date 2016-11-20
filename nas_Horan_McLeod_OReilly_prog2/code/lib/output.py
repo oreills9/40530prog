@@ -21,15 +21,16 @@ class Output:
 
             ## Open writable file
             file = open(output_file, 'w')
+            print(result)
 
             ##Generate headings line
             headings = '     Stopping Reason     | Max. Iterations |' \
-                       ' No. Iterations | Epsilon |' \
+                       ' No. Iterations |      Epsilon      |' \
                        ' X Seq. Tolerance | Res. Seq. Tolerance |'
             print(headings)
 
             ##Generate formatted stastical data
-            stats = "{:^25}|{:^17}|{:^16}|{:^9}|{:^18}|{:^21}|" \
+            stats = "{:^25}|{:^17}|{:^16}|{:^19}|{:^18}|{:^21}|" \
                 .format(stopReason, str(maxIts), str(numIts), str(epsilon), str(xSeqTol), str(residualSeqTol))
             print(stats)
             file.write(headings + '\n')
