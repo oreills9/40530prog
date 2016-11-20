@@ -11,10 +11,13 @@ parser.add_argument('--outfile', default='nas_Sor.out', type=str)
 parser.add_argument('--maxits', default=100, type=int)
 parser.add_argument('--omega', default=1.2, type=float)
 parser.add_argument('--tol', default=Globals.E, type=float)
+parser.add_argument('--check_diag', action='store_false')
 
 args = parser.parse_args()
 # Set tolerance value
 Globals.E = args.tol
+print(args.check_diag)
+Globals.CHECK_DIAG = args.check_diag
 input = Input(args.infile)
 output_file = Output()
 matrix_check = input.row_iterator()
@@ -27,4 +30,4 @@ else:
     sor_res = sor.sor_calc()
     output_file.output_results(args.outfile, sor_res.stopReason, args.maxits,
                                sor_res.xSeqTol, sor_res.residualSeqTol,
-                               sor_res.numIts, sor_res.x_zero, Globals.Em)
+                               sor_res.numIts, sor_res.x_one, Globals.Em)

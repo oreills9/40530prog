@@ -22,6 +22,7 @@ class Globals:
     # This is the approx error used in tolerance calculation
     E = 1.0e-3
 
+    CHECK_DIAG = True
     #Set File path for files
     HOME_DIR = os.chdir("..")
     FILE_DIR = os.getcwd()+'/files'

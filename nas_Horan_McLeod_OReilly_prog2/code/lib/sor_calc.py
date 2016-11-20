@@ -144,7 +144,6 @@ class SorCalc:
         :param tol: The tolerance given the current X values
         :return: boolean
         '''
-        #print("prev %s cur %s tol %s" %(prev_x, cur_x, tol))
         x_diff = abs(self.vector_norm(cur_x) - self.vector_norm(prev_x))
         if x_diff > tol:
             return False

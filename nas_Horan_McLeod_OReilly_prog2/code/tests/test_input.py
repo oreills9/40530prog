@@ -41,7 +41,7 @@ class TestInput(unittest.TestCase):
         tol = 0.001
         sor = SorCalc(mock_csr, 100, 1.2)
         converge = sor.convergence_check(mock_vector_1, mock_vector_2, tol)
-        # Verify stop reason
+        # Verify convergence is true
         self.assertEqual(converge, True)
 
     def test_small_diag_dom(self):
@@ -65,7 +65,7 @@ class TestInput(unittest.TestCase):
         self.assertEqual(sor_res.stopReason, Globals.STOP_REASON_X_SEQ_CON)
 
     def test_sor_eigen_gt_one(self):
-        Globals.check_diag = False
+        Globals.CHECK_DIAG = False
         input = Input("nas_SOR_Eigen_gt_1.in")
         matrix_check = input.row_iterator()
         sor = SorCalc(matrix_check.csr, 100, 1.2)
@@ -74,7 +74,7 @@ class TestInput(unittest.TestCase):
         self.assertEqual(sor_res.stopReason, Globals.STOP_REASON_DIVERGENCE)
 
     def test_sor_eigen_lt_one(self):
-        Globals.check_diag = False
+        Globals.CHECK_DIAG = False
         input = Input("nas_SOR_Eigen_lt_1.in")
         matrix_check = input.row_iterator()
         sor = SorCalc(matrix_check.csr, 100, 1.2)
@@ -83,7 +83,7 @@ class TestInput(unittest.TestCase):
         self.assertEqual(sor_res.stopReason, Globals.STOP_REASON_RES_CON)
 
     def test_sor_transpose_eigen_lt_one(self):
-        Globals.check_diag = False
+        Globals.CHECK_DIAG = False
         input = Input("nas_SOR_transpose.in")
         matrix_check = input.row_iterator()
         sor = SorCalc(matrix_check.csr, 100, 1.2)
