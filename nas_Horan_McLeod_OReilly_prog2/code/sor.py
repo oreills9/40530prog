@@ -16,7 +16,6 @@ parser.add_argument('--check_diag', action='store_false')
 args = parser.parse_args()
 # Set tolerance value
 Globals.E = args.tol
-print(args.check_diag)
 Globals.CHECK_DIAG = args.check_diag
 input = Input(args.infile)
 output_file = Output()

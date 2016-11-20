@@ -1,7 +1,6 @@
 import math
 from lib.globals import Globals
 from lib.output_object import OutputObject
-import numpy as np
 
 class SorCalc:
     '''
